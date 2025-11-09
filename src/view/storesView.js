@@ -45,7 +45,17 @@ export function storesView(stores) {
         print(`${store.name} (${store.category}) / ${status}`);
     }
 }
+export function storeDetailView(store) {
+    print(`\n${store.name}`);
+    print(`평점: ${store.rating}`);
+    print(`최소주문금액: ${store.minOrderAmount}\n`);
+}
+
 export async function promptStoreName(validator) {
     return await retryUserInput(MESSAGE.PROMPT_STORE_NAME, validator);
+}
+
+export async function promptContinueOrder(validator) {
+    return await retryUserInput("계속 주문하시겠습니까? (네/아니오): ", validator);
 }
 
