@@ -6,10 +6,10 @@
         "rating": 4.8,
         "minOrderAmount": 15000,
         "menu": [
-            { "name": "후라이드 치킨", "price": 15000, "detail": "닭고기(국내산)"},
-            { "name": "양념 치킨", "price": 17000, "detail": "닭고기(국내산)"},
-            { "name": "간장 치킨", "price": 17000, "detail": "닭고기(국내산)"},
-            { "name": "치즈볼", "price": 5000, "detail": "치즈(국내산)"}
+            { "name":"후라이드 치킨", "price": 15000, "detail": "닭고기(국내산)"},
+            { "name":"양념 치킨", "price": 17000, "detail": "닭고기(국내산)"},
+            { "name":"간장 치킨", "price": 17000, "detail": "닭고기(국내산)"},
+            { "name":"치즈볼", "price": 5000, "detail": "치즈(국내산)"}
         ]
     },
     {
@@ -19,9 +19,9 @@
         "rating": 4.7,
         "minOrderAmount": 10000,
         "menu": [
-            { "name": "짜장면", "price": 8000, "detail": "면(국내산)"},
-            { "name": "짬뽕", "price": 9000, "detail": "면(국내산)"},
-            { "name": "탕수육", "price": 12000, "detail": "고기(국내산)"}
+            { "name":"짜장면", "price": 8000, "detail": "면(국내산)"},
+            { "name":"짬뽕", "price": 9000, "detail": "면(국내산)"},
+            { "name":"탕수육", "price": 12000, "detail": "고기(국내산)"}
         ]
     },
     {
@@ -31,9 +31,9 @@
         "rating": 4.6,
         "minOrderAmount": 10000,
         "menu": [
-            { "name": "떡볶이", "price": 5000, "detail": "떡(국내산)"},
-            { "name": "김밥", "price": 3000, "detail": "밥(국내산)"},
-            { "name": "순대", "price": 4000, "detail": "면(국내산)"}
+            { "name":"떡볶이", "price": 5000, "detail": "떡(국내산)"},
+            { "name":"김밥", "price": 3000, "detail": "밥(국내산)"},
+            { "name":"순대", "price": 4000, "detail": "면(국내산)"}
         ]
     }
 ]

@@ -18,3 +18,14 @@ export function validateYesOrNo(string) {
     }
     throw new Error("[ERROR] 올바르지 않은 입력입니다. 네 또는 아니오를 입력해주세요.");
 }
+
+export function validateOrderMenu(menus, userInput) {
+    const userMenuList = userInput.split(",").map(menu => menu.trim());
+    const menuNames = menus.map(menu => menu.name);
+
+    for (let userMenu of userMenuList) {
+        if(!menuNames.includes(userMenu)) {
+            throw new Error("[ERROR] 존재하지 않는 메뉴입니다.");
+        }
+    }
+}

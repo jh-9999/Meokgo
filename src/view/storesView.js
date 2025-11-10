@@ -2,15 +2,18 @@ import { Console } from "@woowacourse/mission-utils";
 
 const MESSAGE = {
 
-    WELCOME_MESSAGE: [
+    WELCOME_LOGO: [
         "┌───────────────┐",
         "│     Meokgo    │",
         "└───────────────┘",
       ].join("\n"),
 
     STORE_LIST_TITLE: "가게 목록\n",
-    
+    RATING_TITLE: "평점: ",
+    MIN_ORDER_AMOUNT_TITLE: "최소주문금액: ",
+
     PROMPT_STORE_NAME: "\n원하는 가게 이름을 입력해주세요: ",
+    PROMPT_STORE_SELECTION: "\n계속 주문하시겠습니까? (네/아니오): ",
 
     STATUS_OPEN: "영업중",
     STATUS_CLOSED: "영업종료",
@@ -37,7 +40,7 @@ export async function retryUserInput(placeholder, validator) {
 }
 
 export function storesView(stores) {
-    print(MESSAGE.WELCOME_MESSAGE);
+    print(MESSAGE.WELCOME_LOGO);
     print(MESSAGE.STORE_LIST_TITLE);
     for (let store of stores) {
         let status
@@ -47,8 +50,16 @@ export function storesView(stores) {
 }
 export function storeDetailView(store) {
     print(`\n${store.name}`);
-    print(`평점: ${store.rating}`);
-    print(`최소주문금액: ${store.minOrderAmount}\n`);
+    print(`${MESSAGE.RATING_TITLE}${store.rating}`);
+    print(`${MESSAGE.MIN_ORDER_AMOUNT_TITLE}${store.minOrderAmount}`);
+}
+
+export function storeMenuView(store) {
+    print("\n메뉴 목록");
+    for (let menu of store.menu) {
+        print(`${menu.name} : ${menu.price}원  ${menu.detail}`)
+    }
+    print("");
 }
 
 export async function promptStoreName(validator) {
@@ -56,6 +67,10 @@ export async function promptStoreName(validator) {
 }
 
 export async function promptContinueOrder(validator) {
-    return await retryUserInput("계속 주문하시겠습니까? (네/아니오): ", validator);
+    return await retryUserInput(MESSAGE.PROMPT_STORE_SELECTION, validator);
+}
+
+export async function promptOrderMenu(validator) {
+    return await retryUserInput("원하는 메뉴를 입력해주세요. (예: 후라이드 치킨,양념 치킨): ", validator);
 }
 
