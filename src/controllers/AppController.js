@@ -1,17 +1,22 @@
 import { getStores, findStoreByName, findMenuByName } from "../models/storeModel.js";
-import { validateStore, validateYesOrNo, validateOrderMenu } from "../models/storeRules.js";
+import { validateStore, validateYesOrNo, validateOrderMenu, validateConfirmOrder } from "../models/storeRules.js";
 import { validateNotEmpty, validateKoreanOnly, validateKoreanWithComma } from "../validation/input.js";
 import { 
     storesView, 
     storeDetailView,
     storeMenuView,
+    storeCartView,
+    storeAddMenuView,
     promptStoreName, 
     promptContinueOrder,
-    promptOrderMenu
+    promptOrderMenu,
+    promptConfirmOrder,
+    promptAddMenu,
 } from "../view/storesView.js";
 
 const MESSAGE = {
     ANSWER_YES: "네",
+    ANSWER_ORDER: "주문",
 }
 
 export default class AppController {
@@ -19,7 +24,13 @@ export default class AppController {
         const stores = getStores();
         const store = await selectStoreFlow(stores);
         const selectedMenu = await selectMenu(store);
-        console.log(selectedMenu);
+        const answer = await confirmOrder(selectedMenu, store);
+        if (answer === MESSAGE.ANSWER_ORDER) {
+            const totalPrice = calculateTotalPrice(selectedMenu);
+            if (totalPrice < store.minOrderAmount) {
+                const addedMenu = await addMenu(selectedMenu, store);
+            }
+        }
     }
 }
 
@@ -64,6 +75,17 @@ async function selectMenu(store) {
     return selectedMenu;
 }
 
+async function confirmOrder(selectedMenu,store) {
+    storeCartView(selectedMenu, store);
+    function validateConfirmOrderInput(input) {
+        validateNotEmpty(input);
+        validateKoreanOnly(input);
+        validateConfirmOrder(input)
+    }
+    const confirmOrder = await promptConfirmOrder(validateConfirmOrderInput);
+    return confirmOrder;
+}
+
 async function selectStoreFlow(stores) {
     let store, answer;
     do {
@@ -71,4 +93,24 @@ async function selectStoreFlow(stores) {
         answer = await confirmStoreSelection(store);
     } while (answer !== MESSAGE.ANSWER_YES);
     return store;
+}
+
+
+function calculateTotalPrice(selectedMenu){
+    let totalPrice = 0;
+    for (let menu of selectedMenu) {
+        totalPrice += menu.price;
+    }
+    return totalPrice;
+}
+
+async function addMenu(selectedMenu, store){
+    const availableMenu = storeAddMenuView(selectedMenu, store);
+    function validateAddMenu(input) {
+        validateNotEmpty(input);
+        validateKoreanWithComma(input);
+        validateOrderMenu(availableMenu, input);
+    }
+    const addMenu = await promptAddMenu(validateAddMenu);
+    return addMenu;
 }

@@ -29,3 +29,10 @@ export function validateOrderMenu(menus, userInput) {
         }
     }
 }
+
+export function validateConfirmOrder(input) {
+    if (input == "주문" || input == "취소") {
+        return;
+    }
+    throw new Error("[ERROR] 올바르지 않은 입력입니다. 주문 또는 취소를 입력해주세요.");
+}
