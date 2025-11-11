@@ -31,6 +31,28 @@ const MESSAGE = {
     STATUS_DRINK_NOT_PROVIDED: "제공안함",
 
     PRICE_UNIT: "원",
+
+    ORDER_SUMMARY_TITLE: "\n주문서",
+    ORDER_SUMMARY_ADDRESS: "주소(필수): ",
+    ORDER_SUMMARY_RIDER_REQUEST: "라이더 요청사항: ",
+    ORDER_SUMMARY_PHONE_NUMBER: "연락처(필수): ",
+    ORDER_SUMMARY_STORE_REQUEST: "가게 요청사항: ",
+    ORDER_SUMMARY_PAYMENT_TYPE: "결제 수단(필수): ",
+    ORDER_SUMMARY_DISCOUNT_COUPON: "할인 쿠폰: ",
+    ORDER_SUMMARY_TOTAL_PRICE: "총 결제 금액: ",
+
+    ORDER_SUMMARY_COMPLETE_MESSAGE: "\n※※주문서를 다시 확인해주세요.※※",
+    ORDER_SUMMARY_NOT_COMPLETE_MESSAGE: "현재 가지고 계신 할인 쿠폰이 없습니다.",
+
+    PROMPT_ORDER_SUMMARY: "각 키워드를 입력하면, 해당 항목을 수정할 수 있습니다. (예: 주소,연락처)\n입렁이 끝나면 '결제'를 입력해주세요.",
+    PROMPT_ADDRES: "\n주소를 입력해주세요: ",
+    PROMPT_RIDER_REQUEST: "\n라이더 요청사항을 입력해주세요: ",
+    PROMPT_PHONE_NUMBER: "\n연락처를 입력해주세요: ",
+    PROMPT_STORE_REQUEST: "\n가게 요청사항을 입력해주세요: ",
+    PROMPT_PAYMENT_TYPE: "\n결제 수단을 입력해주세요: ",
+    PROMPT_DISCOUNT_COUPON: "\n할인 쿠폰을 입력해주세요: ",
+
+    ERROR_MESSAGE: "잘못된 입력입니다."
 }
 
 function print(string) {
@@ -117,6 +139,29 @@ export function storeAddMenuView(selectedMenu, store){
     return availableMenu;
 }
 
+export function storeOrderSummaryView(orderSummary){
+    print(MESSAGE.ORDER_SUMMARY_TITLE);
+    print(`${MESSAGE.ORDER_SUMMARY_ADDRESS}${orderSummary.address}`)
+    print(`${MESSAGE.ORDER_SUMMARY_RIDER_REQUEST}${orderSummary.riderRequest}`)
+    print(`${MESSAGE.ORDER_SUMMARY_PHONE_NUMBER}${orderSummary.phoneNumber}`)
+    print(`${MESSAGE.ORDER_SUMMARY_STORE_REQUEST}${orderSummary.storeRequest}`)
+    print(`${MESSAGE.ORDER_SUMMARY_PAYMENT_TYPE}${orderSummary.paymentType}`)
+    print(`${MESSAGE.ORDER_SUMMARY_DISCOUNT_COUPON}${orderSummary.discountCoupon}`)
+    print(`${MESSAGE.ORDER_SUMMARY_TOTAL_PRICE}${orderSummary.totalPrice}${MESSAGE.PRICE_UNIT}\n`)
+}
+
+export function printNoCouponMessage() {
+    print(MESSAGE.ORDER_SUMMARY_NOT_COMPLETE_MESSAGE);
+}
+
+export function printOrderSummaryCompleteMessage() {
+    print(MESSAGE.ORDER_SUMMARY_COMPLETE_MESSAGE);
+}
+
+export function printErrorMessage() {
+    print(MESSAGE.ERROR_MESSAGE);
+}
+
 export async function promptStoreName(validator) {
     return await retryUserInput(MESSAGE.PROMPT_STORE_NAME, validator);
 }
@@ -135,4 +180,32 @@ export async function promptConfirmOrder(validator) {
 
 export async function promptAddMenu(validator) {
     return await retryUserInput(MESSAGE.PROMPT_ADD_MENU, validator);
+}
+
+export async function promptOrderSummary() {
+    return await userInput(MESSAGE.PROMPT_ORDER_SUMMARY);
+}
+
+export async function promptAddres() {
+    return await userInput(MESSAGE.PROMPT_ADDRES);
+}
+
+export async function promptRiderRequest() {
+    return await userInput(MESSAGE.PROMPT_RIDER_REQUEST);
+}
+
+export async function promptPhoneNumber() {
+    return await userInput(MESSAGE.PROMPT_PHONE_NUMBER);
+}
+
+export async function promptStoreRequest() {
+    return await userInput(MESSAGE.PROMPT_STORE_REQUEST);
+}
+
+export async function promptPaymentType() {
+    return await userInput(MESSAGE.PROMPT_PAYMENT_TYPE);
+}
+
+export async function promptDiscountCoupon() {
+    return await userInput(MESSAGE.PROMPT_DISCOUNT_COUPON);
 }
