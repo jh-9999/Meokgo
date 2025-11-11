@@ -1,94 +1,85 @@
 import { getStores, findStoreByName, findMenuByName } from "../models/storeModel.js";
-import { calculateTotalPrice, createOrderSummary } from "../models/orderModel.js";
+import { createOrderSummary } from "../models/orderModel.js";
 import { validateStore, validateYesOrNo, validateOrderMenu, validateConfirmOrder } from "../models/storeRules.js";
 import { isOrderSummaryComplete } from "../models/orderRules.js";
 import { validateNotEmpty, validateKoreanOnly, validateKoreanWithComma } from "../validation/input.js";
+import { ensureMinOrderAmount } from "../services/orderService.js";
+import { COMMAND } from "../constants/commands.js";
+import { parseCommaSeparated } from "../utils/parser.js";
 import { 
     storesView, 
     storeDetailView,
     storeMenuView,
     storeCartView,
-    storeAddMenuView,
     storeOrderSummaryView,
 
     printNoCouponMessage,
-    printOrderSummaryCompleteMessage,
+    printOrderSummaryIncompleteMessage,
     printErrorMessage,
 
     promptStoreName, 
     promptContinueOrder,
     promptOrderMenu,
     promptConfirmOrder,
-    promptAddMenu,
     promptOrderSummary,
-    promptAddres,
+    promptAddress,
     promptRiderRequest,
     promptPhoneNumber,
     promptStoreRequest,
     promptPaymentType,
     promptDiscountCoupon,
-} from "../view/storesView.js";
 
-const MESSAGE = {
-    ANSWER_YES: "네",
-    ANSWER_ORDER: "주문",
-    ANSWER_PAYMENT: "결제",
-    ANSWER_ADDRESS: "주소",
-    ANSWER_RIDER_REQUEST: "라이더 요청사항",
-    ANSWER_PHONE_NUMBER: "연락처",
-    ANSWER_STORE_REQUEST: "가게 요청사항",
-    ANSWER_PAYMENT_TYPE: "결제 수단",
-    ANSWER_DISCOUNT_COUPON: "할인 쿠폰",
-}
+    showDeliveryAnimation,
+    showFoodBoxAnimation,
+    showDoorbell,
+} from "../view/storesView.js";
 
 export default class AppController {
     async run() {
         const stores = getStores();
         const store = await selectStoreFlow(stores);
-        const selectedMenu = await selectMenu(store);
+        let selectedMenu = await selectMenu(store);
         const answer = await confirmOrder(selectedMenu, store);
         const orderSummary = createOrderSummary();
 
-        if(answer === MESSAGE.ANSWER_ORDER) {
-            let totalPrice = calculateTotalPrice(selectedMenu);
-            if (totalPrice < store.minOrderAmount) {
-                const addedMenu = await addMenu(selectedMenu, store);
-                const addedMenuObject= store.menu.filter(menu => menu.name === addedMenu);
-                totalPrice += calculateTotalPrice(addedMenuObject);
-            }
-
-            orderSummary.totalPrice = totalPrice;
+        if(answer === COMMAND.ANSWER_ORDER) {
+            const result = await ensureMinOrderAmount(selectedMenu, store);
+            selectedMenu = result.selectedMenu;
+            orderSummary.totalPrice = result.totalPrice;
 
             while(true){
                 storeOrderSummaryView(orderSummary);
-                let answer = await promptOrderSummary();
-                if(answer === MESSAGE.ANSWER_PAYMENT){
-                    let a = isOrderSummaryComplete(orderSummary);
-                    if(a){
+                const orderAction = await promptOrderSummary();
+                if(orderAction === COMMAND.ANSWER_PAYMENT){
+                    const isComplete = isOrderSummaryComplete(orderSummary);
+                    if(isComplete){
+                        await showDeliveryAnimation();
+                        await showDoorbell();
+                        await showFoodBoxAnimation();
                         break;
                     } else {
-                        printOrderSummaryCompleteMessage();
+                        printOrderSummaryIncompleteMessage();
                         continue;
                     }
                 }
-                switch(answer){
-                    case MESSAGE.ANSWER_ADDRESS: 
-                        orderSummary.address = await promptAddres();
+                switch(orderAction){
+                    case COMMAND.ANSWER_ADDRESS: 
+                        orderSummary.address = await promptAddress();
                     break;
 
-                    case MESSAGE.ANSWER_RIDER_REQUEST: orderSummary.riderRequest = await promptRiderRequest();
+                    case COMMAND.ANSWER_RIDER_REQUEST: orderSummary.riderRequest = await promptRiderRequest();
                     break;
 
-                    case MESSAGE.ANSWER_PHONE_NUMBER: orderSummary.phoneNumber = await promptPhoneNumber();
+                    case COMMAND.ANSWER_PHONE_NUMBER: orderSummary.phoneNumber = await promptPhoneNumber();
                     break;
 
-                    case MESSAGE.ANSWER_STORE_REQUEST: orderSummary.storeRequest = await promptStoreRequest();
+                    case COMMAND.ANSWER_STORE_REQUEST: orderSummary.storeRequest = await promptStoreRequest();
                     break;
 
-                    case MESSAGE.ANSWER_PAYMENT_TYPE: orderSummary.paymentType = await promptPaymentType();
+                    case COMMAND.ANSWER_PAYMENT_TYPE: orderSummary.paymentType = await promptPaymentType();
                     break;
 
-                    case MESSAGE.ANSWER_DISCOUNT_COUPON: 
+                    case COMMAND.ANSWER_DISCOUNT_COUPON: 
                         printNoCouponMessage();
                         orderSummary.discountCoupon = await promptDiscountCoupon();
 
@@ -139,7 +130,7 @@ async function selectMenu(store) {
         validateOrderMenu(store.menu, input);
     }
     const orderMenu = await promptOrderMenu(validateOrderMenuInput);
-    const selectedMenuName = orderMenu.split(",").map(menu => menu.trim());
+    const selectedMenuName = parseCommaSeparated(orderMenu);
     const selectedMenu = findMenuByName(store, selectedMenuName);
     return selectedMenu;
 }
@@ -160,17 +151,6 @@ async function selectStoreFlow(stores) {
     do {
         store = await selectStore(stores);
         answer = await confirmStoreSelection(store);
-    } while (answer !== MESSAGE.ANSWER_YES);
+    } while (answer !== COMMAND.ANSWER_YES);
     return store;
-}
-
-async function addMenu(selectedMenu, store){
-    const availableMenu = storeAddMenuView(selectedMenu, store);
-    function validateAddMenu(input) {
-        validateNotEmpty(input);
-        validateKoreanWithComma(input);
-        validateOrderMenu(availableMenu, input);
-    }
-    const addMenu = await promptAddMenu(validateAddMenu);
-    return addMenu;
 }
