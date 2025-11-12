@@ -86,12 +86,15 @@ export function storeAddMenuView(selectedMenu, store){
 }
 
 export function storeOrderSummaryView(orderSummary){
+
+    const paymentName = orderSummary.payment ? orderSummary.payment.name : "";
+
     print(MESSAGE.ORDER_SUMMARY_TITLE);
     print(`${MESSAGE.ORDER_SUMMARY_ADDRESS}${orderSummary.address}`)
     print(`${MESSAGE.ORDER_SUMMARY_RIDER_REQUEST}${orderSummary.riderRequest}`)
     print(`${MESSAGE.ORDER_SUMMARY_PHONE_NUMBER}${orderSummary.phoneNumber}`)
     print(`${MESSAGE.ORDER_SUMMARY_STORE_REQUEST}${orderSummary.storeRequest}`)
-    print(`${MESSAGE.ORDER_SUMMARY_PAYMENT_TYPE}${orderSummary.paymentType}`)
+    print(`${MESSAGE.ORDER_SUMMARY_PAYMENT_TYPE}${paymentName}`)
     print(`${MESSAGE.ORDER_SUMMARY_DISCOUNT_COUPON}${orderSummary.discountCoupon}`)
     print(`${MESSAGE.ORDER_SUMMARY_TOTAL_PRICE}${orderSummary.totalPrice}${MESSAGE.PRICE_UNIT}\n`)
 }
@@ -148,8 +151,8 @@ export async function promptStoreRequest() {
     return await userInput(MESSAGE.PROMPT_STORE_REQUEST);
 }
 
-export async function promptPaymentType() {
-    return await userInput(MESSAGE.PROMPT_PAYMENT_TYPE);
+export async function promptPaymentType(validator) {
+    return await retryUserInput(MESSAGE.PROMPT_PAYMENT_TYPE, validator);
 }
 
 export async function promptDiscountCoupon() {

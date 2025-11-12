@@ -6,6 +6,7 @@ import { validateNotEmpty, validateKoreanOnly, validateKoreanWithComma } from ".
 import { ensureMinOrderAmount } from "../services/orderService.js";
 import { COMMAND } from "../constants/commands.js";
 import { parseCommaSeparated } from "../utils/parser.js";
+import { PaymentFactory } from "../domain/payment/PaymentFactory.js";
 import { 
     storesView, 
     storeDetailView,
@@ -76,7 +77,17 @@ export default class AppController {
                     case COMMAND.ANSWER_STORE_REQUEST: orderSummary.storeRequest = await promptStoreRequest();
                     break;
 
-                    case COMMAND.ANSWER_PAYMENT_TYPE: orderSummary.paymentType = await promptPaymentType();
+                    case COMMAND.ANSWER_PAYMENT_TYPE: {
+                        function validatePaymentTypeInput(input) {
+                            validateNotEmpty(input);
+                            PaymentFactory.assertSupported(input);
+                        }
+                        const paymentInput = await promptPaymentType(validatePaymentTypeInput);
+
+                        orderSummary.payment = PaymentFactory.create(paymentInput);
+                        // 이 부분이 동적 바인딩 혹은 늦은 바인딩.
+                        console.log(payIt(orderSummary.payment, orderSummary.totalPrice));
+                    }
                     break;
 
                     case COMMAND.ANSWER_DISCOUNT_COUPON: 
@@ -153,4 +164,8 @@ async function selectStoreFlow(stores) {
         answer = await confirmStoreSelection(store);
     } while (answer !== COMMAND.ANSWER_YES);
     return store;
+}
+
+function payIt(payment, totalPrice) {
+    return payment.process(totalPrice);
 }

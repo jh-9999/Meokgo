@@ -4,7 +4,7 @@ export function createOrderSummary() {
         riderRequest: "",
         phoneNumber: "",
         storeRequest: "",
-        paymentType: "",
+        payment: null,
         discountCoupon: "",
         totalPrice: 0,
     };

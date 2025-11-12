@@ -40,8 +40,8 @@ export const MESSAGE = {
     ORDER_SUMMARY_DISCOUNT_COUPON: "할인 쿠폰: ",
     ORDER_SUMMARY_TOTAL_PRICE: "총 결제 금액: ",
 
-    ORDER_SUMMARY_COMPLETE_MESSAGE: "\n※※주문서를 다시 확인해주세요.※※",
-    ORDER_SUMMARY_NOT_COMPLETE_MESSAGE: "현재 가지고 계신 할인 쿠폰이 없습니다.",
+    ORDER_SUMMARY_INCOMPLETE_MESSAGE: "\n※※ 주문서를 다시 확인해주세요. ※※",
+    ORDER_SUMMARY_NO_COUPON_MESSAGE: "현재 가지고 계신 할인 쿠폰이 없습니다.",
 
     PROMPT_ORDER_SUMMARY:
         "각 키워드를 입력하면, 해당 항목을 수정할 수 있습니다. (예: 주소,연락처)\n입력이 끝나면 '결제'를 입력해주세요.",
@@ -49,7 +49,7 @@ export const MESSAGE = {
     PROMPT_RIDER_REQUEST: "\n라이더 요청사항을 입력해주세요: ",
     PROMPT_PHONE_NUMBER: "\n연락처를 입력해주세요: ",
     PROMPT_STORE_REQUEST: "\n가게 요청사항을 입력해주세요: ",
-    PROMPT_PAYMENT_TYPE: "\n결제 수단을 입력해주세요: ",
+    PROMPT_PAYMENT_TYPE: "\n결제 수단을 입력해주세요 (현금/카드/포인트): ",
     PROMPT_DISCOUNT_COUPON: "\n할인 쿠폰을 입력해주세요: ",
 
     ERROR_MESSAGE: "잘못된 입력입니다.",
