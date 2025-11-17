@@ -24,6 +24,8 @@ export const MESSAGE = {
         "추가할 메뉴를 입력해주세요. (예: 후라이드 치킨,양념 치킨): ",
     PROMPT_CONFIRM_ORDER: "주문하시겠습니까? (주문/취소): ",
 
+    THANK_YOU: "이용해주셔서 감사합니다.",
+
     STATUS_OPEN: "영업중",
     STATUS_CLOSED: "영업종료",
     STATUS_DRINK_PROVIDED: "제공",
@@ -51,8 +53,15 @@ export const MESSAGE = {
     PROMPT_STORE_REQUEST: "\n가게 요청사항을 입력해주세요: ",
     PROMPT_PAYMENT_TYPE: "\n결제 수단을 입력해주세요 (현금/카드/포인트): ",
     PROMPT_DISCOUNT_COUPON: "\n할인 쿠폰을 입력해주세요: ",
+    PROMPT_ISSUE_CONFIRM_COUPON: "발급된 쿠폰이 없습니다. 쿠폰을 발급받으시겠습니까? (네/아니오):",
 
     ERROR_MESSAGE: "잘못된 입력입니다.",
+
+    TWENTY_PERCENT_DISCOUNT_COUPON: "20% 할인 쿠폰",
+    FORTY_PERCENT_DISCOUNT_COUPON: "40% 할인 쿠폰",
+    SIXTY_PERCENT_DISCOUNT_COUPON: "60% 할인 쿠폰",
+
+    ALREADY_ISSUED_COUPON_MESSAGE: "\n이미 쿠폰이 적용되었습니다.",
 };
 
 

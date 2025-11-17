@@ -99,16 +99,24 @@ export function storeOrderSummaryView(orderSummary){
     print(`${MESSAGE.ORDER_SUMMARY_TOTAL_PRICE}${orderSummary.totalPrice}${MESSAGE.PRICE_UNIT}\n`)
 }
 
-export function printNoCouponMessage() {
-    print(MESSAGE.ORDER_SUMMARY_NO_COUPON_MESSAGE);
-}
-
 export function printOrderSummaryIncompleteMessage() {
     print(MESSAGE.ORDER_SUMMARY_INCOMPLETE_MESSAGE);
 }
 
 export function printErrorMessage() {
     print(MESSAGE.ERROR_MESSAGE);
+}
+
+export function printThankYou() {
+    print(MESSAGE.THANK_YOU);
+}
+
+export function printCreateCouponMessage(coupon) {
+    print(coupon.getIssuedMessage());
+}
+
+export function printAlreadyIssuedCouponMessage(){
+    print(MESSAGE.ALREADY_ISSUED_COUPON_MESSAGE);
 }
 
 export async function promptStoreName(validator) {
@@ -155,8 +163,8 @@ export async function promptPaymentType(validator) {
     return await retryUserInput(MESSAGE.PROMPT_PAYMENT_TYPE, validator);
 }
 
-export async function promptDiscountCoupon() {
-    return await userInput(MESSAGE.PROMPT_DISCOUNT_COUPON);
+export async function promptDiscountCoupon(validator) {
+    return await retryUserInput(MESSAGE.PROMPT_ISSUE_CONFIRM_COUPON, validator);
 }
 
 function clearScreen() {

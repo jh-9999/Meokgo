@@ -7,6 +7,8 @@ import { ensureMinOrderAmount } from "../services/orderService.js";
 import { COMMAND } from "../constants/commands.js";
 import { parseCommaSeparated } from "../utils/parser.js";
 import { PaymentFactory } from "../domain/payment/PaymentFactory.js";
+import CouponDraw from "../domain/coupon/CouponDraw.js";
+import { MESSAGE } from "../constants/messages.js";
 import { 
     storesView, 
     storeDetailView,
@@ -14,9 +16,11 @@ import {
     storeCartView,
     storeOrderSummaryView,
 
-    printNoCouponMessage,
     printOrderSummaryIncompleteMessage,
     printErrorMessage,
+    printThankYou,
+    printCreateCouponMessage,
+    printAlreadyIssuedCouponMessage,
 
     promptStoreName, 
     promptContinueOrder,
@@ -39,69 +43,33 @@ export default class AppController {
     async run() {
         const stores = getStores();
         const store = await selectStoreFlow(stores);
+
         let selectedMenu = await selectMenu(store);
         const answer = await confirmOrder(selectedMenu, store);
         const orderSummary = createOrderSummary();
 
-        if(answer === COMMAND.ANSWER_ORDER) {
-            const result = await ensureMinOrderAmount(selectedMenu, store);
-            selectedMenu = result.selectedMenu;
-            orderSummary.totalPrice = result.totalPrice;
+        handleOrderDecline(answer);
 
-            while(true){
-                storeOrderSummaryView(orderSummary);
-                const orderAction = await promptOrderSummary();
-                if(orderAction === COMMAND.ANSWER_PAYMENT){
-                    const isComplete = isOrderSummaryComplete(orderSummary);
-                    if(isComplete){
-                        await showDeliveryAnimation();
-                        await showDoorbell();
-                        await showFoodBoxAnimation();
-                        break;
-                    } else {
-                        printOrderSummaryIncompleteMessage();
-                        continue;
-                    }
-                }
-                switch(orderAction){
-                    case COMMAND.ANSWER_ADDRESS: 
-                        orderSummary.address = await promptAddress();
-                    break;
+        const result = await ensureMinOrderAmount(selectedMenu, store);
+        selectedMenu = result.selectedMenu;
+        orderSummary.totalPrice = result.totalPrice;
 
-                    case COMMAND.ANSWER_RIDER_REQUEST: orderSummary.riderRequest = await promptRiderRequest();
-                    break;
+        while(true){
+            storeOrderSummaryView(orderSummary);
+            const orderAction = await promptOrderSummary();
 
-                    case COMMAND.ANSWER_PHONE_NUMBER: orderSummary.phoneNumber = await promptPhoneNumber();
-                    break;
-
-                    case COMMAND.ANSWER_STORE_REQUEST: orderSummary.storeRequest = await promptStoreRequest();
-                    break;
-
-                    case COMMAND.ANSWER_PAYMENT_TYPE: {
-                        function validatePaymentTypeInput(input) {
-                            validateNotEmpty(input);
-                            PaymentFactory.assertSupported(input);
-                        }
-                        const paymentInput = await promptPaymentType(validatePaymentTypeInput);
-
-                        orderSummary.payment = PaymentFactory.create(paymentInput);
-                        // 이 부분이 동적 바인딩 혹은 늦은 바인딩.
-                        console.log(payIt(orderSummary.payment, orderSummary.totalPrice));
-                    }
-                    break;
-
-                    case COMMAND.ANSWER_DISCOUNT_COUPON: 
-                        printNoCouponMessage();
-                        orderSummary.discountCoupon = await promptDiscountCoupon();
-
-                        break;
-
-                    default: printErrorMessage();
-                    break;
-                }
+            if(orderAction !== COMMAND.ANSWER_PAYMENT){
+                await handleOrderAction(orderAction, orderSummary);
+                continue;
             }
-        }else{
-            console.log("이용해주셔서 감사합니다.");
+
+            if(!isOrderSummaryComplete(orderSummary)){
+                printOrderSummaryIncompleteMessage();
+                continue;
+            }
+
+            await showDeliveryResultAnimation();
+            break;
         }
     }
 }
@@ -117,6 +85,15 @@ async function selectStore(stores) {
         
     const storeName = await promptStoreName(validateStoreInput);
     const store = findStoreByName(storeName);
+    return store;
+}
+
+async function selectStoreFlow(stores) {
+    let store, answer;
+    do {
+        store = await selectStore(stores);
+        answer = await confirmStoreSelection(store);
+    } while (answer !== COMMAND.ANSWER_YES);
     return store;
 }
 
@@ -157,15 +134,89 @@ async function confirmOrder(selectedMenu,store) {
     return confirmOrder;
 }
 
-async function selectStoreFlow(stores) {
-    let store, answer;
-    do {
-        store = await selectStore(stores);
-        answer = await confirmStoreSelection(store);
-    } while (answer !== COMMAND.ANSWER_YES);
-    return store;
+function handleOrderDecline(answer) {
+    if(answer === COMMAND.ANSWER_ORDER) {
+        return
+    } else {
+        throw new Error(printThankYou())
+    }
 }
 
 function payIt(payment, totalPrice) {
     return payment.process(totalPrice);
 }
+
+async function handleOrderAction(orderAction, orderSummary) {
+    switch(orderAction){
+        case COMMAND.ANSWER_ADDRESS: 
+            orderSummary.address = await promptAddress();
+        break;
+
+        case COMMAND.ANSWER_RIDER_REQUEST: orderSummary.riderRequest = await promptRiderRequest();
+        break;
+
+        case COMMAND.ANSWER_PHONE_NUMBER: orderSummary.phoneNumber = await promptPhoneNumber();
+        break;
+
+        case COMMAND.ANSWER_STORE_REQUEST: orderSummary.storeRequest = await promptStoreRequest();
+        break;
+
+        case COMMAND.ANSWER_PAYMENT_TYPE: {
+            function validatePaymentTypeInput(input) {
+                validateNotEmpty(input);
+                PaymentFactory.assertSupported(input);
+            }
+            const paymentInput = await promptPaymentType(validatePaymentTypeInput);
+
+            orderSummary.payment = PaymentFactory.create(paymentInput);
+            // 이 부분이 동적 바인딩 혹은 늦은 바인딩.
+            console.log(payIt(orderSummary.payment, orderSummary.totalPrice));
+        }
+        break;
+
+        case COMMAND.ANSWER_DISCOUNT_COUPON: 
+            if(orderSummary.discountCoupon === "") {
+                const coupon = await DrawCoupon();
+                orderSummary.discountCoupon = coupon.name || "";
+                orderSummary.totalPrice = discountCoupon(coupon, orderSummary.totalPrice)
+            } else {
+                printAlreadyIssuedCouponMessage();
+            }
+            break;
+
+        default: printErrorMessage();
+        break;
+    }
+}
+
+async function DrawCoupon() {
+
+    function validateDrawCouponInput(input) {
+        validateNotEmpty(input);
+        validateKoreanOnly(input)
+        validateYesOrNo(input)
+    }
+    const answer = await promptDiscountCoupon(validateDrawCouponInput);
+
+    if(answer === COMMAND.ANSWER_YES) {
+        const draw = new CouponDraw();
+        const coupon = draw.createCoupon();
+        printCreateCouponMessage(coupon);
+        return coupon;
+    }
+    return "";
+}
+
+function discountCoupon(coupon, totalPrice) {
+    if(coupon) {
+        return coupon.apply(totalPrice)
+    }
+    return totalPrice;
+}
+
+async function showDeliveryResultAnimation() {
+    await showDeliveryAnimation();
+    await showDoorbell();
+    await showFoodBoxAnimation();
+}
+
